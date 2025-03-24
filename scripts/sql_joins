@@ -48,6 +48,14 @@ FROM customers  AS c
 /*
  -- RIGHT JOIN (all from the right and matching from the left)
 Order of the table is very important
-TASKS: Get all the customes along with their orders, including those without orders
+TASKS: Get all the customes along with their orders, including orders without matching customers
 */
 
+SELECT 
+	c.id,
+	c.first_name,
+	o.order_id,
+	o.sales
+FROM customers  AS c
+	RIGHT JOIN orders AS o
+	ON c.id = o.customer_id
