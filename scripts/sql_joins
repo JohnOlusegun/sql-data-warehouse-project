@@ -1,0 +1,53 @@
+-- SQL JOINS
+
+-- NO Join
+SELECT * FROM customers;
+
+SELECT * FROM orders;
+
+
+/*
+--Inner join (Only the matching rows from both tables)
+Get customers along with their orders, 
+but only customers who have placed an order. Doesnt mind the order of Table)
+*/
+
+SELECT 
+	customers.id,
+	customers.first_name,
+	orders.order_id,
+	orders.sales
+FROM customers 
+INNER JOIN orders 
+ON id = customer_id
+
+SELECT 
+	c.id,
+	c.first_name,
+	o.order_id,
+	o.sales
+FROM customers  AS c
+	INNER JOIN orders AS o
+	ON c.id = o.customer_id
+
+/*
+-- LEFT JOIN (all from the left and matching from the right)
+Order of the table is very important
+TASKS: Get all the customes along with their orders, including those without orders
+*/
+
+SELECT 
+	c.id,
+	c.first_name,
+	o.order_id,
+	o.sales
+FROM customers  AS c
+	LEFT JOIN orders AS o
+	ON c.id = o.customer_id
+
+/*
+ -- RIGHT JOIN (all from the right and matching from the left)
+Order of the table is very important
+TASKS: Get all the customes along with their orders, including those without orders
+*/
+
