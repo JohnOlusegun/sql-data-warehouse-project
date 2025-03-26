@@ -6,6 +6,7 @@ SQL JOINS
 =====================================================================
 /*
 
+-- SQL JOINS
 
 -- NO Join
 SELECT * FROM customers;
@@ -20,7 +21,7 @@ SELECT
 	orders.sales
 FROM customers 
 INNER JOIN orders 
-ON id = customer_id
+ON id = customer_id;
 
 SELECT 
 	c.id,
@@ -29,7 +30,7 @@ SELECT
 	o.sales
 FROM customers  AS c
 	INNER JOIN orders AS o
-	ON c.id = o.customer_id
+	ON c.id = o.customer_id;
 
 -- LEFT JOIN (all from the left and matching from the right), Order of the table is very important
 -- TASKS: Get all the customes along with their orders, including those without orders
@@ -41,7 +42,7 @@ SELECT
 	o.sales
 FROM customers  AS c
 	LEFT JOIN orders AS o
-	ON c.id = o.customer_id
+	ON c.id = o.customer_id;
 
 -- RIGHT JOIN (all from the right and matching from the left) Order of the table is very important
 -- TASKS: Get all the customes along with their orders, including orders without matching customers
@@ -65,7 +66,7 @@ SELECT
 	o.sales
 FROM orders  AS o
 	LEFT JOIN customers AS c
-	ON c.id = o.customer_id
+	ON c.id = o.customer_id;
 
 -- Full Join
 
@@ -76,11 +77,11 @@ SELECT
 	o.sales
 FROM orders  AS o
 	Full Join customers AS c
-	ON c.id = o.customer_id
+	ON c.id = o.customer_id;
 
-SELECT * FROM  customers 
+SELECT * FROM  customers;
 
-SELECT * FROM orders
+SELECT * FROM orders;
 
 -- ADVANCED JOIN, LEFT ANTI JOIN ( I prefer swapping the tables than using a right Join)
 -- Find customers that didnt place an order
@@ -88,15 +89,15 @@ SELECT * FROM orders
 SELECT *
 FROM customers c
 left JOIN orders o
-on c.id = o.customer_id
-where o.customer_id is null
+	on c.id = o.customer_id
+where o.customer_id is null;
 
 -- Orders that didnt have a recorded customer
 SELECT *
 FROM orders o
 left JOIN customers c 
 on c.id = o.customer_id
-where c.id is null
+where c.id is null;
 
 -- Full Anti Join
 -- Orders that didnt have respective customer and Customers that havent purchased.
@@ -104,4 +105,4 @@ SELECT *
 FROM orders o
 FULL JOIN customers c 
 on c.id = o.customer_id
-where c.id is null or o.customer_id is null
+where c.id is null or o.customer_id is null;
