@@ -7,7 +7,7 @@ Set Operators in SQL
 Scripts Purpose:
   UNION: combine rows by removing the duplicates. Returns all distinct
   UNION ALL: Combine all rows from the Table A and Table B together without removing Duplicates
-  Except: Returns all distinct rows from the first query that are not found in the second query. Order of query is important
+  Except: Returns all distinct rows from the first query that are not found in the second query. Order of query is important (Data Discrepancy checks, Integration Checks, Updates)
   Intersect: Returns only the rows that are common in each queries. Doesnt mind the order of query
 
 SET RULES:
