@@ -72,3 +72,40 @@ SELECT
 FROM Sales.Customers
 
 
+-- UNION best Practice
+
+-- UNION best Practice
+SELECT 
+      'Orders' AS SourceTable
+      ,[OrderID]
+      ,[ProductID]
+      ,[CustomerID]
+      ,[SalesPersonID]
+      ,[OrderDate]
+      ,[ShipDate]
+      ,[OrderStatus]
+      ,[ShipAddress]
+      ,[BillAddress]
+      ,[Quantity]
+      ,[Sales]
+      ,[CreationTime]
+  FROM [SalesDB].[Sales].[Orders]
+UNION
+SELECT 
+      'OrdersArchive' AS SourceTable
+      ,[OrderID]
+      ,[ProductID]
+      ,[CustomerID]
+      ,[SalesPersonID]
+      ,[OrderDate]
+      ,[ShipDate]
+      ,[OrderStatus]
+      ,[ShipAddress]
+      ,[BillAddress]
+      ,[Quantity]
+      ,[Sales]
+      ,[CreationTime]
+  FROM [SalesDB].[Sales].[OrdersArchive]
+ORDER BY OrderID
+
+
