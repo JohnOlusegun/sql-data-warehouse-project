@@ -6,7 +6,6 @@ SQL JOINS
 =====================================================================
 /*
 
--- SQL JOINS
 
 -- NO Join
 SELECT * FROM customers;
@@ -33,7 +32,6 @@ FROM customers  AS c
 	ON c.id = o.customer_id;
 
 -- LEFT JOIN (all from the left and matching from the right), Order of the table is very important
--- TASKS: Get all the customes along with their orders, including those without orders
 
 SELECT 
 	c.id,
@@ -45,7 +43,6 @@ FROM customers  AS c
 	ON c.id = o.customer_id;
 
 -- RIGHT JOIN (all from the right and matching from the left) Order of the table is very important
--- TASKS: Get all the customes along with their orders, including orders without matching customers
 
 SELECT 
 	c.id,
@@ -55,8 +52,6 @@ SELECT
 FROM customers  AS c
 	RIGHT JOIN orders AS o
 	ON c.id = o.customer_id
-
-Select * from orders
 
 -- LEFT JOIN
 SELECT 
@@ -79,12 +74,7 @@ FROM orders  AS o
 	Full Join customers AS c
 	ON c.id = o.customer_id;
 
-SELECT * FROM  customers;
-
-SELECT * FROM orders;
-
 -- ADVANCED JOIN, LEFT ANTI JOIN ( I prefer swapping the tables than using a right Join)
--- Find customers that didnt place an order
 
 SELECT *
 FROM customers c
@@ -100,7 +90,7 @@ on c.id = o.customer_id
 where c.id is null;
 
 -- Full Anti Join
--- Orders that didnt have respective customer and Customers that havent purchased.
+
 SELECT *
 FROM orders o
 FULL JOIN customers c 
