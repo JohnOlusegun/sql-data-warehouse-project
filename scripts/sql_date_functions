@@ -111,14 +111,14 @@ WHERE MONTH(OrderDate) = 2;
 SELECT
 OrderID,
 CreationTime,
-FORMAT(CreationTime, 'MM-dd-yyyy') USA_Format,
-FORMAT(CreationTime, 'dd-MM-yyyy') EURO_Format,
-FORMAT(CreationTime, 'dd') dd,
-FORMAT(CreationTime, 'ddd') ddd,
-FORMAT(CreationTime, 'dddd') dddd,
-FORMAT(CreationTime, 'MM') MM,
-FORMAT(CreationTime, 'MMM') MMM,
-FORMAT(CreationTime, 'MMMM') MMMM
+FORMAT(CreationTime, 'MM-dd-yyyy') AS USA_Format,
+FORMAT(CreationTime, 'dd-MM-yyyy') AS EURO_Format,
+FORMAT(CreationTime, 'dd') AS dd,
+FORMAT(CreationTime, 'ddd') AS ddd,
+FORMAT(CreationTime, 'dddd') AS dddd,
+FORMAT(CreationTime, 'MM') AS MM,
+FORMAT(CreationTime, 'MMM') AS MMM,
+FORMAT(CreationTime, 'MMMM') AS MMMM
 FROM Sales.Orders
 
 -- Show CreationTime using the following format:
