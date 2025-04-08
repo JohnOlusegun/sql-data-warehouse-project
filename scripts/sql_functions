@@ -1,6 +1,103 @@
 /*
-======================================================
-SQl Functionss
+========================================
+            SQL DATE FUNCTIONS
+========================================
+
+- DATEPART(part, date) returns INT values.
+- DATENAME(part, date) returns STRING values.
+- DATETRUNC(part, date) truncates the date to a specified part.
+- EOMONTH(date) returns the last day of the month.
+*/
+
+--========================================
+--           DATE EXTRACTION EXAMPLES
+--========================================
+
+SELECT
+    OrderID,
+    CreationTime,
+
+    -- DATETRUNC Examples
+    DATETRUNC(year, CreationTime)   AS Year_dt,
+    DATETRUNC(minute, CreationTime) AS Minute_dt,
+    DATETRUNC(day, CreationTime)    AS Day_dt,
+
+    -- DATENAME Examples
+    DATENAME(month, CreationTime)   AS Month_dn,
+    DATENAME(weekday, CreationTime) AS Weekday_dn,
+    DATENAME(day, CreationTime)     AS Day_dn,
+    DATENAME(year, CreationTime)    AS Year_dn,
+
+    -- DATEPART Examples
+    DATEPART(year, CreationTime)    AS Year_dp,
+    DATEPART(month, CreationTime)   AS Month_dp,
+    DATEPART(day, CreationTime)     AS Day_dp,
+    DATEPART(hour, CreationTime)    AS Hour_dp,
+    DATEPART(quarter, CreationTime) AS Quarter_dp,
+    DATEPART(week, CreationTime)    AS Week_dp,
+    DATEPART(minute, CreationTime)  AS Minute_dp,
+
+    -- Random Extraction Functions
+    YEAR(CreationTime)              AS Year,
+    MONTH(CreationTime)             AS Month,
+    DAY(CreationTime)               AS Day,
+
+    -- EOMONTH Example
+    EOMONTH(CreationTime)           AS EndOfMonth
+
+FROM Sales.Orders;
 
 
-/*
+--========================================
+-- COUNT ORDERS BY MONTH (DATETRUNC)
+--========================================
+
+SELECT 
+    DATETRUNC(month, CreationTime) AS CreationMonth,
+    COUNT(*)                       AS OrderCount
+FROM Sales.Orders 
+GROUP BY DATETRUNC(month, CreationTime);
+
+
+--========================================
+-- FIRST & LAST DAY OF THE MONTH
+--========================================
+
+SELECT 
+    OrderID,
+    CreationTime,
+    CAST(DATETRUNC(month, CreationTime) AS DATE) AS StartOfMonth,
+    EOMONTH(CreationTime)                      AS EndOfMonth
+FROM Sales.Orders;
+
+
+--========================================
+-- NUMBER OF ORDERS PLACED EACH YEAR
+--========================================
+
+SELECT 
+    YEAR(OrderDate) AS OrderYear,
+    COUNT(*)        AS NrOfOrders
+FROM Sales.Orders 
+GROUP BY YEAR(OrderDate);
+
+
+--========================================
+-- NUMBER OF ORDERS PLACED EACH MONTH
+--========================================
+
+SELECT 
+    DATENAME(month, OrderDate) AS MonthName,
+    COUNT(*)                   AS NrOfOrders
+FROM Sales.Orders 
+GROUP BY DATENAME(month, OrderDate);
+
+
+--========================================
+-- ORDERS PLACED IN FEBRUARY
+--========================================
+
+SELECT 
+    *
+FROM Sales.Orders 
+WHERE MONTH(OrderDate) = 2;
