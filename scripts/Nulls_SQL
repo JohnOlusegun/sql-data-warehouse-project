@@ -1,0 +1,45 @@
+*/
+------------------------------------ SQL: Working with NULLs ------------------------------------
+
+1. Replacing NULL Values
+   - ISNULL(expression, replacement): Only 2 arguments
+     Example: ISNULL(ship_address, billing_address)
+              ISNULL(ship_address, 'N/A')
+
+   - COALESCE(expr1, expr2, ..., exprN): Returns the first non-NULL
+     Example: COALESCE(ship_address, billing_address, 'N/A')
+
+   - NULLIF(expr1, expr2): Returns NULL if expressions are equal
+     Example: NULLIF(column1, column2)
+
+2. Checking for NULLs
+   - IS NULL          → Checks if value is NULL
+   - IS NOT NULL      → Checks if value is NOT NULL
+     Example: WHERE Score IS NULL
+              WHERE LastName IS NOT NULL
+/*
+-----------------------------------------------------------------------------------------------
+
+-- Use Case 1: Find average scores of the customers and replacing nulls
+
+SELECT  
+    CustomerID,
+    Score,
+    COALESCE(Score, 0) AS Score2,
+    AVG(Score) OVER () AS AvgScores,
+    AVG(COALESCE(Score, 0)) OVER () AS AvgScores_Nl
+FROM Sales.Customers;
+
+-----------------------------------------------------------------------------------------------
+-- Use Case 2: Display the full name of the customers in a single field by merging their first and last names, and add 10 bonus points to each customer's Score)
+
+SELECT 
+    CustomerID,
+    FirstName,
+    LastName,
+    FirstName + ' ' + COALESCE(LastName, ' ') AS FullName,
+    Score,
+    COALESCE(Score, 0) + 10 AS ScoreWithBonus
+FROM Sales.Customers;
+
+-----------------------------------------------------------------------------------------------
