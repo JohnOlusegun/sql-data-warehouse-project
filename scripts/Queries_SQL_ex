@@ -82,7 +82,9 @@ SELECT
     COALESCE(NULLIF(TRIM(Category), ''), 'unknown') AS Policy3
 FROM Orders;
 
--- CASE
+=======================================================================
+-- CASE STATEMENT
+=======================================================================
 -- Generate a report showing the total sales for each category (High, Medium, Low)
 -- Sort the Category from highest to lowest total sales
 SELECT 
@@ -101,3 +103,163 @@ FROM (
 ) AS t
 GROUP BY Category 
 ORDER BY TotalSales DESC;
+
+USE SalesDB;
+-- Using CASE statement to map Values 
+-- Retrive employee details with gender displayed as full text 
+SELECT 
+    EmployeeID,
+    FirstName,
+    LastName,
+    Gender,
+    CASE 
+        WHEN Gender = 'F' THEN 'Female'
+        WHEN Gender = 'M' THEN 'Male'
+        ELSE 'Not Avaliable'
+    END AS GenderFulLText
+FROM Sales.Employees
+
+-- Retrive employee details with abbreviated country code
+SELECT 
+    CustomerID,
+    FirstName,
+    LastName,
+    Country,
+    CASE 
+        WHEN Country = 'Germany' THEN 'DE'
+        WHEN Country = 'USA' THEN 'US'
+        ELSE 'N/A'
+    END AS CountrySHRT
+FROM Sales.Customers;
+
+-- OR using the Quick Form
+SELECT 
+    CustomerID,
+    FirstName,
+    LastName,
+    Country,
+    CASE Country
+        WHEN  'Germany' THEN 'DE'
+        WHEN  'USA' THEN 'US'
+        ELSE 'N/A'
+    END AS CountrySHRT
+FROM Sales.Customers;
+
+-- Using CASE to handle NULL
+-- find the average score of customers and treat Nulls as 0
+-- Additionally provide details such CustomerID and LastName
+SELECT
+    CustomerID,
+    LastName,
+    Score,
+    AVG(CASE 
+            WHEN Score IS NULL THEN 0
+            ELSE Score 
+            END ) OVER() AVG_ScoreClean,
+    AVG(Score) OVER() as AvgCustomer
+FROM 
+    Sales.Customers;
+
+-- Customers whose scores are greater than the Average score
+SELECT 
+    CustomerID,
+    LastName,
+    Score,
+    AVG_ScoreClean
+FROM(
+    SELECT
+        CustomerID,
+        LastName,
+        Score,
+        AVG(CASE 
+                WHEN Score IS NULL THEN 0
+                ELSE Score 
+            END ) OVER() AVG_ScoreClean,
+        AVG(Score) OVER() as AvgCustomer
+    FROM Sales.Customers) T 
+WHERE Score > AVG_ScoreClean;
+
+====================================================================================
+-- Conditional Aggregation 
+====================================================================================
+-- USE CASE: Count how many times each customer has made an order with sales greater than 30
+SELECT
+        CustomerID,
+        SUM(CASE 
+            WHEN Sales > 30 THEN 1
+            ELSE 0
+        END) AS TotalOrdersHighSales,
+        COUNT(*) AS TotalOrders
+FROM Sales.Orders
+GROUP BY CustomerID;
+
+/*
+SELECT
+    CustomerID,
+    SUM(HighSalesFlag) AS TotalOrdersHighSales,
+    COUNT(*) AS TotalOrders
+FROM (
+    SELECT 
+        CustomerID,
+        CASE WHEN Sales > 30 THEN 1 ELSE 0 END AS HighSalesFlag
+    FROM Sales.Orders
+) AS Sub
+GROUP BY CustomerID;
+--------------------------------------------------------------------
+WITH OrderFlags AS (
+    SELECT 
+        CustomerID,
+        CASE WHEN Sales > 30 THEN 1 ELSE 0 END AS HighSalesFlag
+    FROM Sales.Orders
+)
+SELECT
+    CustomerID,
+    SUM(HighSalesFlag) AS TotalOrdersHighSales,
+    COUNT(*) AS TotalOrders
+FROM OrderFlags
+GROUP BY CustomerID;
+*/
+
+-- USE CASE: Count how many times each customer has made an order with sales greater than 30 include Customer's name
+WITH CustomerHighSales AS (
+    SELECT
+        CustomerID,
+        SUM(CASE 
+            WHEN Sales > 30 THEN 1
+            ELSE 0
+        END) AS TotalOrdersHighSales,
+        COUNT(*) AS TotalOrders
+    FROM Sales.Orders
+    GROUP BY CustomerID
+)
+SELECT 
+    B.FirstName,
+    C.CustomerID,
+    C.TotalOrdersHighSales,
+    C.TotalOrders
+FROM CustomerHighSales AS C 
+INNER JOIN Sales.Customers AS B 
+    ON C.CustomerID = B.CustomerID;
+
+-- with Subquerry
+SELECT 
+    B.FirstName,
+    A.CustomerID,
+    A.TotalOrdersHighSales,
+    A.TotalOrders
+FROM (
+    SELECT
+        CustomerID,
+        SUM(CASE 
+            WHEN Sales > 30 THEN 1
+            ELSE 0
+        END) AS TotalOrdersHighSales,
+        COUNT(*) AS TotalOrders
+    FROM Sales.Orders
+    GROUP BY CustomerID
+) AS A
+INNER JOIN Sales.Customers AS B 
+    ON A.CustomerID = B.CustomerID;
+
+------------------------------------------------------------------------
+
