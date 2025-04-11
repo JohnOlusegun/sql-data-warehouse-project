@@ -43,3 +43,61 @@ SELECT
 FROM Sales.Customers;
 
 -----------------------------------------------------------------------------------------------
+-- Sort the customers from lowest to highest scores with the NULLs at the end
+SELECT 
+    CustomerID,
+    Score
+FROM Sales.Customers 
+ORDER BY 
+    CASE WHEN Score IS NULL THEN 1 ELSE 0 END, 
+    Score;
+
+-- NULLIF: Will check two values; if equal, will return NULL
+-- Find the sales price for each order by dividing Sales by Quantity
+SELECT
+    OrdersID,
+    Sales,
+    Quantity,
+    Sales / NULLIF(Quantity, 0) AS Price 
+FROM Sales.Orders;
+
+-- IS NULL and IS NOT NULL
+-- Identify the customers who have no scores
+SELECT 
+    *
+FROM Sales.Customers
+WHERE Score IS NULL;
+
+-- Handling NULL, BLANK Space, Empty String
+WITH Orders AS (
+    SELECT 1 AS Id, 'A' AS Category UNION
+    SELECT 2, NULL UNION
+    SELECT 3, '' UNION
+    SELECT 4, '  '
+)
+SELECT
+    *,
+    TRIM(Category) AS Policy1,
+    NULLIF(TRIM(Category), '') AS Policy2,
+    COALESCE(NULLIF(TRIM(Category), ''), 'unknown') AS Policy3
+FROM Orders;
+
+-- CASE
+-- Generate a report showing the total sales for each category (High, Medium, Low)
+-- Sort the Category from highest to lowest total sales
+SELECT 
+    Category,
+    SUM(Sales) AS TotalSales
+FROM (
+    SELECT 
+        OrderID,
+        Sales,
+        CASE
+            WHEN Sales > 50 THEN 'High'
+            WHEN Sales > 20 THEN 'Medium'
+            ELSE 'Low'
+        END AS Category 
+    FROM Sales.Orders
+) AS t
+GROUP BY Category 
+ORDER BY TotalSales DESC;
