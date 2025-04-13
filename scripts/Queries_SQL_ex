@@ -262,4 +262,76 @@ INNER JOIN Sales.Customers AS B
     ON A.CustomerID = B.CustomerID;
 
 ------------------------------------------------------------------------
+-- Windows Function Syntax
+-- Expression OVER (PARTITION BY ... ORDER BY ... FRAME)
+
+-- 1. Find the total sales across all orders (Include OrderID and OrderDate)
+SELECT 
+    OrderID,
+    OrderDate,
+    SUM(Sales) OVER () AS TotalSales
+FROM Sales.Orders;
+
+
+-- 2. Find the total sales for each product (Include OrderID and OrderDate)
+SELECT 
+    OrderID,
+    OrderDate,
+    ProductID,
+    SUM(Sales) OVER (PARTITION BY ProductID) AS TotalSales
+FROM Sales.Orders;
+
+
+-- 3. Find total sales overall and by product
+SELECT 
+    OrderID,
+    OrderDate,
+    ProductID,
+    Sales,
+    SUM(Sales) OVER () AS TotalSales,
+    SUM(Sales) OVER (PARTITION BY ProductID) AS TotalSalesByProducts
+FROM Sales.Orders;
+
+
+-- 4. Find the total sales for each combination of product and order status
+SELECT 
+    OrderID,
+    OrderDate,
+    ProductID,
+    Sales,
+    SUM(Sales) OVER (PARTITION BY ProductID, OrderStatus) AS TotalSalesByProductAndStatus
+FROM Sales.Orders;
+
+
+-- 5. Rank each order based on their Sales from highest to lowest
+SELECT 
+    OrderID,
+    OrderDate,
+    Sales,
+    RANK() OVER (ORDER BY Sales DESC) AS RankSales
+FROM Sales.Orders;
+
+
+-- 6. Windows Frame: Sum of Sales over a sliding window (current row and next 2 rows)
+SELECT 
+    OrderID,
+    OrderDate,
+    OrderStatus,
+    Sales,
+    SUM(Sales) OVER (
+        PARTITION BY OrderStatus 
+        ORDER BY OrderDate 
+        ROWS BETWEEN CURRENT ROW AND 2 FOLLOWING
+    ) AS TotalSales
+FROM Sales.Orders;
+
+
+-- 7. Rank customers based on total sales using GROUP BY with Window Function
+SELECT 
+    CustomerID,
+    SUM(Sales) AS TotalSales,
+    RANK() OVER (ORDER BY SUM(Sales) DESC) AS RankCustomers
+FROM Sales.Orders 
+GROUP BY CustomerID;
+
 
