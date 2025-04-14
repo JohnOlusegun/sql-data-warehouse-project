@@ -335,3 +335,170 @@ FROM Sales.Orders
 GROUP BY CustomerID;
 
 
+USE SalesDB;
+
+-- Retrieve employee details with gender displayed as full text
+SELECT 
+    EmployeeID,
+    FirstName,
+    LastName,
+    Gender,
+    CASE 
+        WHEN Gender = 'F' THEN 'Female'
+        WHEN Gender = 'M' THEN 'Male'
+        ELSE 'Not Available'
+    END AS GenderFullText
+FROM Sales.Employees;
+
+
+-- Retrieve customer details with abbreviated country code (long form CASE)
+SELECT 
+    CustomerID,
+    FirstName,
+    LastName,
+    Country,
+    CASE 
+        WHEN Country = 'Germany' THEN 'DE'
+        WHEN Country = 'USA' THEN 'US'
+        ELSE 'N/A'
+    END AS CountryShort
+FROM Sales.Customers;
+
+
+-- Retrieve customer details with abbreviated country code (short form CASE)
+SELECT 
+    CustomerID,
+    FirstName,
+    LastName,
+    Country,
+    CASE Country
+        WHEN 'Germany' THEN 'DE'
+        WHEN 'USA' THEN 'US'
+        ELSE 'N/A'
+    END AS CountryShort
+FROM Sales.Customers;
+
+
+-- Handle NULLs: Find average customer score treating NULL as 0
+SELECT
+    CustomerID,
+    LastName,
+    Score,
+    AVG(CASE 
+            WHEN Score IS NULL THEN 0
+            ELSE Score 
+        END) OVER () AS AvgScoreClean,
+    AVG(Score) OVER () AS AvgCustomer
+FROM Sales.Customers;
+
+
+-- Customers with scores greater than the average (NULL treated as 0)
+SELECT 
+    CustomerID,
+    LastName,
+    Score,
+    AvgScoreClean
+FROM (
+    SELECT
+        CustomerID,
+        LastName,
+        Score,
+        AVG(CASE 
+                WHEN Score IS NULL THEN 0
+                ELSE Score 
+            END) OVER () AS AvgScoreClean,
+        AVG(Score) OVER () AS AvgCustomer
+    FROM Sales.Customers
+) AS T
+WHERE Score > AvgScoreClean;
+
+
+-- View all customers
+SELECT * 
+FROM Sales.Customers;
+
+
+-- Conditional Aggregation: Count how many times each customer made an order with sales > 30
+SELECT
+    CustomerID,
+    SUM(CASE 
+            WHEN Sales > 30 THEN 1
+            ELSE 0
+        END) AS TotalOrdersHighSales,
+    COUNT(*) AS TotalOrders
+FROM Sales.Orders
+GROUP BY CustomerID;
+
+
+-- Alternative with subquery
+/*
+SELECT
+    CustomerID,
+    SUM(HighSalesFlag) AS TotalOrdersHighSales,
+    COUNT(*) AS TotalOrders
+FROM (
+    SELECT 
+        CustomerID,
+        CASE WHEN Sales > 30 THEN 1 ELSE 0 END AS HighSalesFlag
+    FROM Sales.Orders
+) AS Sub
+GROUP BY CustomerID;
+
+-- Alternative with CTE
+WITH OrderFlags AS (
+    SELECT 
+        CustomerID,
+        CASE WHEN Sales > 30 THEN 1 ELSE 0 END AS HighSalesFlag
+    FROM Sales.Orders
+)
+SELECT
+    CustomerID,
+    SUM(HighSalesFlag) AS TotalOrdersHighSales,
+    COUNT(*) AS TotalOrders
+FROM OrderFlags
+GROUP BY CustomerID;
+*/
+
+
+-- Join customer names with high sales aggregation (using CTE)
+WITH CustomerHighSales AS (
+    SELECT
+        CustomerID,
+        SUM(CASE 
+                WHEN Sales > 30 THEN 1
+                ELSE 0
+            END) AS TotalOrdersHighSales,
+        COUNT(*) AS TotalOrders
+    FROM Sales.Orders
+    GROUP BY CustomerID
+)
+SELECT 
+    B.FirstName,
+    C.CustomerID,
+    C.TotalOrdersHighSales,
+    C.TotalOrders
+FROM CustomerHighSales AS C 
+INNER JOIN Sales.Customers AS B 
+    ON C.CustomerID = B.CustomerID;
+
+
+-- Same join using a subquery instead of CTE
+SELECT 
+    B.FirstName,
+    A.CustomerID,
+    A.TotalOrdersHighSales,
+    A.TotalOrders
+FROM (
+    SELECT
+        CustomerID,
+        SUM(CASE 
+                WHEN Sales > 30 THEN 1
+                ELSE 0
+            END) AS TotalOrdersHighSales,
+        COUNT(*) AS TotalOrders
+    FROM Sales.Orders
+    GROUP BY CustomerID
+) AS A
+INNER JOIN Sales.Customers AS B 
+    ON A.CustomerID = B.CustomerID;
+
