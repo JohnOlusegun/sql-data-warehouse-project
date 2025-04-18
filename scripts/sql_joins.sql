@@ -6,13 +6,11 @@ SQL JOINS
 =====================================================================
 */
 
-
 -- NO Join
 SELECT * FROM customers;
 SELECT * FROM orders;
 
 --Inner join (Only the matching rows from both tables) Get customers along with their orders, but only customers who have placed an order. Doesnt mind the order of Table)
-
 SELECT 
 	customers.id,
 	customers.first_name,
@@ -32,7 +30,6 @@ FROM customers  AS c
 	ON c.id = o.customer_id;
 
 -- LEFT JOIN (all from the left and matching from the right), Order of the table is very important
-
 SELECT 
 	c.id,
 	c.first_name,
@@ -43,7 +40,6 @@ FROM customers  AS c
 	ON c.id = o.customer_id;
 
 -- RIGHT JOIN (all from the right and matching from the left) Order of the table is very important
-
 SELECT 
 	c.id,
 	c.first_name,
@@ -64,7 +60,6 @@ FROM orders  AS o
 	ON c.id = o.customer_id;
 
 -- Full Join
-
 SELECT 
 	c.id,
 	c.first_name,
@@ -75,7 +70,6 @@ FROM orders  AS o
 	ON c.id = o.customer_id;
 
 -- ADVANCED JOIN, LEFT ANTI JOIN ( I prefer swapping the tables than using a right Join)
-
 SELECT *
 FROM customers c
 left JOIN orders o
@@ -90,7 +84,6 @@ on c.id = o.customer_id
 where c.id is null;
 
 -- Full Anti Join
-
 SELECT *
 FROM orders o
 FULL JOIN customers c 
@@ -99,7 +92,6 @@ where c.id is null or o.customer_id is null;
 
 
 -- Multiple Join of tables
-
 SELECT 
     o.OrderID,
     o.Sales,
