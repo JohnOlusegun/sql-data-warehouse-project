@@ -1,3 +1,4 @@
+
 -- CASE 1: Find the Total Sales Per Customer (Non-Recursive: Stand alone cte)
 WITH CTE_Total_Sales AS 
 (
