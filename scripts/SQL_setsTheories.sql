@@ -1,9 +1,7 @@
 /*
-
 =========================================================
 Set Operators in SQL
 =========================================================
-
 Scripts Purpose:
   UNION: combine rows by removing the duplicates. Returns all distinct
   UNION ALL: Combine all rows from the Table A and Table B together without removing Duplicates
@@ -71,8 +69,6 @@ SELECT
 	LastName
 FROM Sales.Customers
 
-
--- UNION best Practice
 
 -- UNION best Practice
 SELECT 
