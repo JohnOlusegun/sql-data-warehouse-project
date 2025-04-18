@@ -1,25 +1,6 @@
-*/
------------------------------------- SQL: Working with NULLs ------------------------------------
-
-1. Replacing NULL Values
-   - ISNULL(expression, replacement): Only 2 arguments
-     Example: ISNULL(ship_address, billing_address)
-              ISNULL(ship_address, 'N/A')
-
-   - COALESCE(expr1, expr2, ..., exprN): Returns the first non-NULL
-     Example: COALESCE(ship_address, billing_address, 'N/A')
-
-   - NULLIF(expr1, expr2): Returns NULL if expressions are equal
-     Example: NULLIF(column1, column2)
-
-2. Checking for NULLs
-   - IS NULL          → Checks if value is NULL
-   - IS NOT NULL      → Checks if value is NOT NULL
-     Example: WHERE Score IS NULL
-              WHERE LastName IS NOT NULL
-/*
------------------------------------------------------------------------------------------------
-
+=======================================================================
+-- WORKING WITH NULLS
+=======================================================================
 -- Use Case 1: Find average scores of the customers and replacing nulls
 
 SELECT  
@@ -499,7 +480,7 @@ WHERE DistRank <= 0.4;
 -- Window Value Functions (LEAD, LAG, LAST_VALUE, FIRST_VALUE)
 --==============================================================
 -- LEAD Function : Accesses the *next* row
--- LAG Function  : Accesses the *previous* row
+-- LAG Function : Accesses the *previous* row
 
 --==============================================================
 -- USE CASE 1: Analyze month-over-month performance by finding 
