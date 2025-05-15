@@ -7,6 +7,9 @@
   - Derived Columns
   - Data Enrichment
 */
+====================================================================================================================================================
+    CRM TABLES
+====================================================================================================================================================
 
 -- ============================================
 -- Data Quality Checks on bronze.crm_cust_info
@@ -290,4 +293,189 @@ WHERE prd_end_dt < prd_start_dt;
 SELECT * 
 FROM silver.crm_prd_info;
 
+-- ========================================================
+-- Step 1: Initial Review of Data in bronze.crm_sales_details
+-- ========================================================
+
+SELECT 
+    sls_ord_num,
+    sls_prd_key,
+    sls_cust_id,
+    sls_order_dt,
+    sls_ship_dt,
+    sls_due_dt,
+    sls_sales,
+    sls_quantity,
+    sls_price
+FROM bronze.crm_sales_details;
+
+
+-- ========================================================
+-- Step 2: Check for Invalid Order Dates
+-- Criteria:
+--   - Order dates should be 8-digit integers (yyyymmdd)
+--   - Valid range: 19000101 to 20500101
+--   - Must not be zero or malformed
+-- Expectation: No rows returned
+-- ========================================================
+
+SELECT 
+    NULLIF(sls_order_dt, 0) AS sls_order_dt
+FROM bronze.crm_sales_details
+WHERE sls_order_dt <= 0 
+    OR LEN(sls_order_dt) != 8
+    OR sls_order_dt > 20500101 
+    OR sls_order_dt < 19000101;
+
+
+-- ========================================================
+-- Step 3: Check for Invalid Date Relationships
+-- Criteria:
+--   - Order date must be earlier than or equal to ship and due dates
+-- Expectation: No rows returned
+-- ========================================================
+
+SELECT *
+FROM bronze.crm_sales_details
+WHERE sls_order_dt > sls_ship_dt 
+   OR sls_order_dt > sls_due_dt;
+
+
+-- ========================================================
+-- Step 4: Check Data Consistency Between Sales, Quantity, and Price
+-- Logic:
+--   - Sales = Quantity * Price
+--   - No NULL, zero, or negative values allowed
+--   - Price should be corrected to ABS (if needed)
+-- ========================================================
+
+SELECT DISTINCT
+    sls_sales AS old_sls_sales,
+    sls_quantity,
+    sls_price AS old_sls_price,
+
+    -- Recomputed sales if invalid
+    CASE 
+        WHEN sls_sales IS NULL 
+          OR sls_sales <= 0 
+          OR sls_sales != sls_quantity * ABS(sls_price)
+        THEN sls_quantity * ABS(sls_price)
+        ELSE sls_sales
+    END AS recomputed_sales,
+
+    -- Recomputed price if invalid
+    CASE 
+        WHEN sls_price IS NULL 
+          OR sls_price <= 0 
+        THEN sls_sales / NULLIF(sls_quantity, 0)
+        ELSE sls_price
+    END AS recomputed_price
+
+FROM bronze.crm_sales_details
+WHERE sls_sales != sls_quantity * sls_price
+    OR sls_sales IS NULL 
+    OR sls_quantity IS NULL 
+    OR sls_price IS NULL 
+    OR sls_sales <= 0 
+    OR sls_quantity <= 0 
+    OR sls_price <= 0
+ORDER BY
+    sls_sales,
+    sls_quantity,
+    sls_price;
+
+-- =============================================================================
+-- STEP 1: Drop and Recreate silver.crm_sales_details with Updated DDL
+-- =============================================================================
+
+IF OBJECT_ID('silver.crm_sales_details', 'U') IS NOT NULL
+    DROP TABLE silver.crm_sales_details;
+
+CREATE TABLE silver.crm_sales_details (
+    sls_ord_num     NVARCHAR(50),
+    sls_prd_key     NVARCHAR(50),
+    sls_cust_id     INT,
+    sls_order_dt    DATE,
+    sls_ship_dt     DATE,
+    sls_due_dt      DATE,
+    sls_sales       INT,
+    sls_quantity    INT,
+    sls_price       INT,
+    dwh_create_date DATETIME2 DEFAULT GETDATE()
+);
+
+-- =============================================================================
+-- STEP 2: Truncate Target Table and Insert Cleaned Data from bronze.crm_sales_details
+-- =============================================================================
+
+TRUNCATE TABLE silver.crm_sales_details;
+
+INSERT INTO silver.crm_sales_details (
+    sls_ord_num,
+    sls_prd_key,
+    sls_cust_id,
+    sls_order_dt,
+    sls_ship_dt,
+    sls_due_dt,
+    sls_sales,
+    sls_quantity,
+    sls_price
+)
+SELECT 
+    sls_ord_num,
+    sls_prd_key,
+    sls_cust_id,
+
+    -- Clean and convert order date
+    CASE 
+        WHEN sls_order_dt = 0 OR LEN(sls_order_dt) != 8 
+        THEN NULL
+        ELSE CAST(CAST(sls_order_dt AS VARCHAR) AS DATE)
+    END AS sls_order_dt,
+
+    -- Clean and convert ship date
+    CASE 
+        WHEN sls_ship_dt = 0 OR LEN(sls_ship_dt) != 8 
+        THEN NULL
+        ELSE CAST(CAST(sls_ship_dt AS VARCHAR) AS DATE)
+    END AS sls_ship_dt,
+
+    -- Clean and convert due date
+    CASE 
+        WHEN sls_due_dt = 0 OR LEN(sls_due_dt) != 8 
+        THEN NULL
+        ELSE CAST(CAST(sls_due_dt AS VARCHAR) AS DATE)
+    END AS sls_due_dt,
+
+    -- Recalculate sales if missing or incorrect
+    CASE 
+        WHEN sls_sales IS NULL OR sls_sales <= 0 OR sls_sales != sls_quantity * ABS(sls_price)
+        THEN sls_quantity * ABS(sls_price)
+        ELSE sls_sales 
+    END AS sls_sales,
+
+    -- Retain quantity
+    sls_quantity,
+
+    -- Derive price if original is invalid or non-positive
+    CASE 
+        WHEN sls_price IS NULL OR sls_price <= 0 
+        THEN sls_sales / NULLIF(sls_quantity, 0)
+        ELSE sls_price
+    END AS sls_price
+
+FROM bronze.crm_sales_details;
+
+
+-- =============================================================================
+-- STEP 3: View Final Cleaned Table
+-- =============================================================================
+
+SELECT * 
+FROM silver.crm_sales_details;
+
+
+====================================================================================================================================================
+    ERP TABLES
+====================================================================================================================================================
 
